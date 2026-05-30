@@ -1,0 +1,29 @@
+# ── Image data (too large, download from dataset source) ──
+data/database/
+data/uploads/
+
+# ── Built indexes (generated locally) ──
+index/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# ── IDE / OS ──
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+
+# ── Misc ──
+*.log

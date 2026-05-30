@@ -1,0 +1,90 @@
+graph TB
+    subgraph OFFLINE["<b>离线阶段：索引构建</b>"]
+        direction TB
+        DB[("<b>第1步：图像数据库</b><br/>遍历 data/database/<br/>筛选 .jpg .png .bmp .webp")]
+
+        DB --> SIFT1["<b>第2步：SIFT 特征提取</b><br/>cv2.SIFT_create()<br/>detectAndCompute()<br/>每张图 → 若干 128-d 描述符"]
+
+        SIFT1 --> VOCAB["<b>第3步：BoW 词汇表构建</b><br/>np.vstack 合并全部描述符<br/>np.random.choice 采样 ≤150k<br/>MiniBatchKMeans n=1000<br/>→ 1000 个视觉词聚类中心"]
+
+        VOCAB --> BOW_ENC["<b>第4步：BoW 编码</b><br/>kmeans.predict() → 视觉词分配<br/>np.bincount → 词频直方图<br/>TF 归一化 + IDF 加权<br/>sklearn L2 归一化<br/>→ 1000-d BoW 向量"]
+
+        BOW_ENC --> FAISS_BOW["<b>第5步：FAISS BoW 索引</b><br/>faiss.IndexFlatL2<br/>bow_index.add()<br/>写入全部 BoW 向量"]
+
+        DB --> RESNET1["<b>第2步(并行)：ResNet50 推理</b><br/>PIL.Image.open → RGB<br/>T.Resize(256)→CenterCrop(224)<br/>T.ToTensor→Normalize<br/>ResNet50 去FC层 eval<br/>torch.no_grad() 推理<br/>→ 2048-d → L2 归一化"]
+
+        RESNET1 --> FAISS_DEEP["<b>第5步(并行)：FAISS Deep 索引</b><br/>faiss.IndexFlatIP<br/>deep_index.add()<br/>写入全部 Deep 向量"]
+
+        FAISS_BOW --> SAVE["<b>第6步：持久化到磁盘</b><br/>pickle.dump → bow_data.pkl<br/>faiss.serialize_index → bow.faiss<br/>faiss.serialize_index → deep.faiss"]
+        FAISS_DEEP --> SAVE
+    end
+
+    SAVE -.->|"pickle.load + faiss.deserialize_index<br/>加载已构建的双索引"| LOAD
+
+    subgraph ONLINE["<b>在线阶段：查询检索</b>"]
+        direction TB
+        LOAD["<b>双索引已就绪</b>"]
+
+        LOAD --> QUERY["<b>第1步：查询图片输入</b><br/>Flask 接收上传/库内图片"]
+
+        QUERY --> Q_SIFT["<b>第2步：SIFT + BoW 编码</b><br/>SIFT 提取关键点+描述符<br/>kmeans.predict() 复用离线KMeans<br/>np.bincount → TF归一化<br/>× IDF 复用离线IDF<br/>L2 归一化 → 1000-d 查询向量"]
+
+        QUERY --> Q_DEEP["<b>第2步(并行)：ResNet50 编码</b><br/>Resize(256)→CenterCrop(224)<br/>ToTensor→Normalize<br/>ResNet50 eval 推理<br/>L2 归一化 → 2048-d 查询向量"]
+
+        QUERY --> Q_FLIP["<b>第2步(并行)：翻转增强</b><br/>PIL.FLIP_LEFT_RIGHT<br/>→ 同上ResNet50流程<br/>L2归一化 → 翻转2048-d"]
+
+        Q_SIFT --> FAISS_S["<b>第3步：FAISS 双路检索</b><br/>IndexFlatL2.search(k×20)<br/>bow_d → bow_sim=1/(1+d)"]
+        Q_DEEP --> FAISS_D1["IndexFlatIP.search(k×20)<br/>原始图内积分数"]
+        Q_FLIP --> FAISS_D2["IndexFlatIP.search(k×20)<br/>翻转图内积分数"]
+
+        FAISS_D1 --> MAX["np.maximum(deep_d, deep_d_flip)<br/>取原始/翻转最大相似度"]
+        FAISS_D2 --> MAX
+
+        FAISS_S --> FUSION["<b>第4步：多模态分数融合</b><br/>0.35 × bow_sim<br/>+ 0.65 × deep_sim(Min-Max归一化后)<br/>sorted 降序 → 取 Top-15"]
+        MAX --> FUSION
+
+        FUSION --> GEO["<b>第5步：几何空间验证</b><br/><i>逐一对 Top-15 执行</i>"]
+
+        GEO --> GEO_SIFT["SIFT 重提取<br/>查询关键点 + 候选关键点"]
+
+        GEO_SIFT --> FLANN["FLANN knnMatch(k=2)<br/>Lowe ratio test < 0.75<br/>筛选 good matches"]
+
+        FLANN --> CHECK1{"good ≥ 10 ?"}
+        CHECK1 -->|"否"| GEO_FAIL["geo_score = 0"]
+        CHECK1 -->|"是"| HOMO["findHomography<br/>RANSAC 阈值 5px"]
+
+        HOMO --> CHECK2{"M≠None<br/>inliers ≥ 8 ?"}
+        CHECK2 -->|"否"| GEO_FAIL
+        CHECK2 -->|"是"| GEO_OK["geo_score =<br/>0.7×inlier_ratio<br/>+ 0.3×match_ratio"]
+
+        GEO_FAIL --> FINAL["<b>第6步：最终评分排序</b>"]
+        GEO_OK --> FINAL
+
+        FINAL --> FINAL_SCORE["已验证候选:<br/>final = 0.6×fusion + 0.4×geo<br/><br/>未验证候选:<br/>final = fusion × 0.75<br/><br/>sorted 降序 → Top-K(K=5)"]
+
+        FINAL_SCORE --> RESULT["<b>第7步：返回结果</b><br/>JSON {results, query_url, elapsed_ms}<br/>→ 前端渲染 Top-5 卡片"]
+    end
+
+    style DB fill:#C8E6C9,stroke:#37474F
+    style SIFT1 fill:#FFCDD2,stroke:#37474F
+    style VOCAB fill:#FFE0B2,stroke:#37474F
+    style BOW_ENC fill:#FFE0B2,stroke:#37474F
+    style RESNET1 fill:#FFCDD2,stroke:#37474F
+    style FAISS_BOW fill:#E1BEE7,stroke:#37474F
+    style FAISS_DEEP fill:#E1BEE7,stroke:#37474F
+    style SAVE fill:#C8E6C9,stroke:#37474F
+    style QUERY fill:#CFD8DC,stroke:#37474F
+    style Q_SIFT fill:#FFE0B2,stroke:#37474F
+    style Q_DEEP fill:#FFCDD2,stroke:#37474F
+    style Q_FLIP fill:#BBDEFB,stroke:#37474F
+    style FAISS_S fill:#B2EBF2,stroke:#37474F
+    style FAISS_D1 fill:#B2EBF2,stroke:#37474F
+    style FAISS_D2 fill:#B2EBF2,stroke:#37474F
+    style FUSION fill:#FFF9C4,stroke:#37474F
+    style GEO fill:#FFCCBC,stroke:#37474F
+    style GEO_SIFT fill:#FFCDD2,stroke:#37474F
+    style FLANN fill:#FFCCBC,stroke:#37474F
+    style HOMO fill:#FFCCBC,stroke:#37474F
+    style FINAL fill:#FFF9C4,stroke:#37474F
+    style FINAL_SCORE fill:#FFF9C4,stroke:#37474F
+    style RESULT fill:#CFD8DC,stroke:#37474F

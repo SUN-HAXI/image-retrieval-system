@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图像检索系统 – SIFT+BoW+FAISS+Deep</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>🔍 大规模图像检索系统</h1>
+    <span class="subtitle">SIFT + Bag-of-Words + ResNet50 + FAISS + 几何验证</span>
+    <div class="status-bar" id="statusBar">
+      <span id="statusDot" class="dot off"></span>
+      <span id="statusText">检查索引状态…</span>
+      <button id="btnBuild" onclick="buildIndex()">🛠 构建索引</button>
+      <button id="btnRefresh" onclick="checkStatus()">🔄 刷新</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 左侧：查询区域 -->
+    <section class="panel query-panel">
+      <h2>📥 查询图片</h2>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" hidden>
+        <div class="drop-content">
+          <span class="drop-icon">📁</span>
+          <p>拖拽图片到此处，或点击选择</p>
+          <p class="hint">支持 JPG / PNG / BMP / WebP</p>
+        </div>
+      </div>
+
+      <div id="queryPreview" class="query-preview hidden">
+        <img id="queryImg" src="" alt="查询图片">
+        <p id="queryName"></p>
+        <button class="btn-search" onclick="doSearch()">🔎 开始检索</button>
+      </div>
+
+      <div class="db-browse">
+        <h3>或从数据库中选择：</h3>
+        <div id="dbImageList" class="db-list">加载中…</div>
+      </div>
+
+      <div id="searchInfo" class="search-info hidden"></div>
+    </section>
+
+    <!-- 右侧：结果区域 -->
+    <section class="panel results-panel">
+      <h2>📊 检索结果 – Top 5</h2>
+      <div id="resultsContainer" class="results-grid">
+        <div class="placeholder">
+          <span>⬅ 上传图片开始检索</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="overlay hidden">
+    <div class="spinner"></div>
+    <p id="loadingText">处理中…</p>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #fff;
+  padding: 20px 40px;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+header .subtitle {
+  display: block;
+  font-size: 13px;
+  color: #a0b4d0;
+  margin-top: 4px;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.status-bar button {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.status-bar button:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 2px;
+}
+
+.dot.on {
+  background: #4caf50;
+  box-shadow: 0 0 6px #4caf50;
+}
+
+.dot.off {
+  background: #f44336;
+  box-shadow: 0 0 6px #f44336;
+}
+
+/* ── Main layout ────────────────────────────────────────── */
+main {
+  display: flex;
+  gap: 24px;
+  max-width: 1300px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+@media (max-width: 800px) {
+  main {
+    flex-direction: column;
+  }
+}
+
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+}
+
+.query-panel {
+  flex: 0 0 420px;
+}
+
+.results-panel {
+  flex: 1;
+}
+
+.panel h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #1a1a2e;
+}
+
+/* ── Drop zone ──────────────────────────────────────────── */
+.drop-zone {
+  border: 2px dashed #c0c8d4;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  background: #fafbfc;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #0f3460;
+  background: #eef2f9;
+}
+
+.drop-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.drop-content p {
+  color: #666;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.drop-content .hint {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ── Query preview ──────────────────────────────────────── */
+.query-preview {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.query-preview img {
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  object-fit: contain;
+}
+
+.query-preview p {
+  margin: 6px 0;
+  font-size: 13px;
+  color: #555;
+  word-break: break-all;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.btn-search {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 32px;
+  background: linear-gradient(135deg, #0f3460, #1a1a2e);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-search:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(15, 52, 96, 0.35);
+}
+
+/* ── DB browse ──────────────────────────────────────────── */
+.db-browse {
+  margin-top: 20px;
+}
+
+.db-browse h3 {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.db-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.db-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.db-thumb:hover {
+  border-color: #0f3460;
+}
+
+/* ── Search info ────────────────────────────────────────── */
+.search-info {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #0f3460;
+  text-align: center;
+}
+
+/* ── Results grid ───────────────────────────────────────── */
+.results-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.results-grid .placeholder {
+  color: #aaa;
+  font-size: 16px;
+  padding: 80px 20px;
+}
+
+.result-card {
+  width: 200px;
+  background: #fafbfc;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e8ecf1;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeIn 0.4s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.result-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.result-card .card-info {
+  padding: 10px 12px;
+}
+
+.result-card .card-name {
+  font-size: 12px;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-card .card-score {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f3460;
+  margin-top: 2px;
+}
+
+.result-card .card-rank {
+  display: inline-block;
+  background: #0f3460;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  border-radius: 50%;
+  float: right;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Overlay / Spinner ──────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.overlay p {
+  color: #fff;
+  margin-top: 16px;
+  font-size: 15px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
