@@ -1,0 +1,39 @@
+# ── Image data (mount at runtime) ──
+data/database/
+data/uploads/
+
+# ── Built indexes (generated at runtime) ──
+index/
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# ── Git ──
+.git/
+.gitignore
+
+# ── IDE / OS ──
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ── Diagrams & docs (not needed at runtime) ──
+*.mermaid
+*.png
+model_architecture.md
+draw_*.py
+render_diagram.py
+generate_test_images.py
+
+# ── Misc ──
+*.log
+Dockerfile
+.dockerignore
