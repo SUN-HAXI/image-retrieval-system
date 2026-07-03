@@ -165,6 +165,17 @@ cd image-retrieval-system
 pip install -r requirements.txt
 ```
 
+### Docker 部署
+
+```bash
+# 构建镜像
+docker build -t image-retrieval-system .
+# 运行容器
+docker run -p 5000:5000 -v $(pwd)/data:/app/data image-retrieval-system
+```
+
+构建完成后访问 http://127.0.0.1:5000 即可使用。
+
 ### 准备数据集
 
 ```bash
@@ -314,7 +325,7 @@ image-retrieval-system/
 - [ ] 增量索引更新 (不重建)
 - [ ] 多GPU推理加速
 - [ ] 图片去重 (using perceptual hash pre-filter)
-- [ ] Docker 一键部署
+- [x] Docker 一键部署
 
 ---
 
