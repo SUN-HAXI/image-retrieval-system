@@ -158,7 +158,7 @@ final_score = 0.6 × (0.35×bow_sim + 0.65×deep_sim) + 0.4 × geo_score
 
 ```bash
 # 克隆仓库
-git clone https://github.com/YOUR_USERNAME/image-retrieval-system.git
+git clone https://github.com/SUN-HAXI/image-retrieval-system.git
 cd image-retrieval-system
 
 # 安装依赖
