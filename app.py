@@ -125,4 +125,4 @@ if __name__ == "__main__":
     print(f"  索引目录:   {INDEX_DIR}")
     print(f"  已加载索引: {'是' if _loaded else '否 – 请先放置图片到 data/database/ 然后点击构建索引'}")
     print(f"\n  打开浏览器访问 → http://127.0.0.1:5000\n")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=os.environ.get("FLASK_DEBUG", "0") == "1")
